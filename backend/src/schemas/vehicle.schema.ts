@@ -18,7 +18,7 @@ export class Vehicle {
   year: number;
 
   @Prop()
-  pictureUrl: string;
+  pictureUrl?: string;
 }
 
 export const VehicleSchema = SchemaFactory.createForClass(Vehicle);
