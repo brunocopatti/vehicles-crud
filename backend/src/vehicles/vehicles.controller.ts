@@ -11,6 +11,7 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -49,6 +50,20 @@ export class VehiclesController {
     return this.vehiclesService.remove(id);
   }
 
+  @ApiOperation({ summary: 'Upload a vehicle picture' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Image file',
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @Post(':id/picture')
   @UseInterceptors(
     FileInterceptor('file', {
