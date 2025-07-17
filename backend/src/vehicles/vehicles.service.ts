@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { Vehicle, VehicleDocument } from '../schemas/vehicle.schema';
 
 @Injectable()
 export class VehiclesService {
-  create(createVehicleDto: CreateVehicleDto) {
-    return 'This action adds a new vehicle';
+  constructor(
+    @InjectModel(Vehicle.name)
+    private readonly vehicleModel: Model<VehicleDocument>,
+  ) {}
+
+  async create(createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
+    const createdVehicle = new this.vehicleModel(createVehicleDto);
+    return createdVehicle.save();
   }
 
-  findAll() {
-    return `This action returns all vehicles`;
+  async findAll(): Promise<Vehicle[]> {
+    return this.vehicleModel.find().exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} vehicle`;
+  async findOne(id: string): Promise<Vehicle> {
+    const vehicle = await this.vehicleModel.findById(id).exec();
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with id ${id} not found`);
+    }
+    return vehicle;
   }
 
-  update(id: number, updateVehicleDto: UpdateVehicleDto) {
-    return `This action updates a #${id} vehicle`;
+  async update(
+    id: string,
+    updateVehicleDto: UpdateVehicleDto,
+  ): Promise<Vehicle> {
+    const updated = await this.vehicleModel
+      .findByIdAndUpdate(id, updateVehicleDto, {
+        new: true,
+        runValidators: true,
+      })
+      .exec();
+    if (!updated) {
+      throw new NotFoundException(`Vehicle with id ${id} not found`);
+    }
+    return updated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} vehicle`;
+  async remove(id: string): Promise<Vehicle> {
+    const deleted = await this.vehicleModel.findByIdAndDelete(id).exec();
+    if (!deleted) {
+      throw new NotFoundException(`Vehicle with id ${id} not found`);
+    }
+    return deleted;
   }
 }
