@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateVehicle } from '../api/vehicles';
+import { updateVehicle, uploadVehiclePicture } from '../api/vehicles';
 import type { Vehicle } from '../types/vehicle';
 
 const vehicleSchema = z.object({
@@ -13,6 +13,16 @@ const vehicleSchema = z.object({
     .number({ error: 'Ano inválido' })
     .min(1900)
     .max(new Date().getFullYear() + 1),
+  picture: z
+    .any()
+    .transform((files: FileList) => files?.[0])
+    .refine((file) => !file || file instanceof File, {
+      message: 'Arquivo inválido',
+    })
+    .refine((file) => !file || file.size <= 5 * 1024 * 1024, {
+      message: 'A imagem deve ter no máximo 5MB',
+    })
+    .optional(),
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
@@ -29,14 +39,30 @@ export default function VehicleEditModal({ vehicle, onClose }: Props) {
     formState: { errors },
   } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
-    defaultValues: vehicle,
+    defaultValues: {
+      licensePlate: vehicle.licensePlate,
+      brand: vehicle.brand,
+      model: vehicle.model,
+      year: vehicle.year,
+    },
   });
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: async (newVehicle: VehicleFormData) => {
-      console.log('Atualizando veículo:', newVehicle);
-      await updateVehicle(vehicle._id, newVehicle);
+    mutationFn: async (formData: VehicleFormData) => {
+      const picture = formData.picture;
+      const dataWithoutPicture = {
+        licensePlate: formData.licensePlate,
+        brand: formData.brand,
+        model: formData.model,
+        year: formData.year,
+      };
+
+      await updateVehicle(vehicle._id, dataWithoutPicture);
+
+      if (picture) {
+        await uploadVehiclePicture(vehicle._id, picture);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
@@ -45,7 +71,6 @@ export default function VehicleEditModal({ vehicle, onClose }: Props) {
   });
 
   const onSubmit = (data: VehicleFormData) => {
-    console.log('Novo veículo:', data);
     mutation.mutate(data);
   };
 
@@ -109,6 +134,18 @@ export default function VehicleEditModal({ vehicle, onClose }: Props) {
             />
             {errors.year && (
               <p className="text-red-500 text-sm">{errors.year.message}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              type="file"
+              accept="image/*"
+              {...register('picture')}
+              className="w-full border p-2 rounded"
+            />
+            {errors.picture && (
+              <p className="text-red-500 text-sm">{errors.picture.message}</p>
             )}
           </div>
 

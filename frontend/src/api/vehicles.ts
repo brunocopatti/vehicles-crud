@@ -30,3 +30,19 @@ export const updateVehicle = async (
   const res = await api.patch(`/vehicles/${id}`, vehicleData);
   return res.data;
 };
+
+export const uploadVehiclePicture = async (
+  id: string,
+  file: File,
+): Promise<Vehicle> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await api.post(`/vehicles/${id}/picture`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return res.data;
+};

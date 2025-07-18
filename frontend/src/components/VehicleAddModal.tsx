@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addVehicle } from '../api/vehicles';
+import { addVehicle, uploadVehiclePicture } from '../api/vehicles';
 
 const vehicleSchema = z.object({
   licensePlate: z.string().min(1, 'Placa obrigatória'),
@@ -12,6 +12,19 @@ const vehicleSchema = z.object({
     .number({ error: 'Ano inválido' })
     .min(1900)
     .max(new Date().getFullYear() + 1),
+  picture: z
+    .any()
+    .transform((files: FileList) => files?.[0])
+    .refine((file) => !file || file instanceof File, {
+      message: 'Arquivo inválido',
+    })
+    .refine(
+      (file) => !file || file.size <= 5 * 1024 * 1024, // 5MB
+      {
+        message: 'A imagem deve ter no máximo 5MB',
+      },
+    )
+    .optional(),
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
@@ -39,7 +52,12 @@ export default function VehicleAddModal({ onClose }: Props) {
   const mutation = useMutation({
     mutationFn: async (newVehicle: VehicleFormData) => {
       console.log('Adicionando veículo:', newVehicle);
-      await addVehicle(newVehicle);
+      const picture = newVehicle.picture;
+      delete newVehicle.picture; // Remove picture from data to send
+      const vehicle = await addVehicle(newVehicle);
+      if (picture) {
+        await uploadVehiclePicture(vehicle._id, picture);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
@@ -110,6 +128,18 @@ export default function VehicleAddModal({ onClose }: Props) {
             />
             {errors.year && (
               <p className="text-red-500 text-sm">{errors.year.message}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              type="file"
+              accept="image/*"
+              {...register('picture')}
+              className="w-full border p-2 rounded"
+            />
+            {errors.picture && (
+              <p className="text-red-500 text-sm">{errors.picture.message}</p>
             )}
           </div>
 
