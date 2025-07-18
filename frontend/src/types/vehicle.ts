@@ -10,4 +10,9 @@ type Vehicle = {
   updatedAt: string;
 };
 
-export type { Vehicle };
+type VehicleAddData = Omit<
+  Vehicle,
+  '_id' | 'createdAt' | 'updatedAt' | '__v' | 'pictureUrl'
+>;
+
+export type { Vehicle, VehicleAddData };
