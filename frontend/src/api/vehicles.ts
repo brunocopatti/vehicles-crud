@@ -17,3 +17,8 @@ export const addVehicle = async (
   const res = await api.post('/vehicles', vehicleData);
   return res.data;
 };
+
+export const deleteVehicle = async (id: string): Promise<Vehicle> => {
+  const res = await api.delete(`/vehicles/${id}`);
+  return res.data;
+};
