@@ -22,3 +22,11 @@ export const deleteVehicle = async (id: string): Promise<Vehicle> => {
   const res = await api.delete(`/vehicles/${id}`);
   return res.data;
 };
+
+export const updateVehicle = async (
+  id: string,
+  vehicleData: Partial<Vehicle>,
+): Promise<Vehicle> => {
+  const res = await api.patch(`/vehicles/${id}`, vehicleData);
+  return res.data;
+};

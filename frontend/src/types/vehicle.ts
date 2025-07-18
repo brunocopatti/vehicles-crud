@@ -15,4 +15,8 @@ type VehicleAddData = Omit<
   '_id' | 'createdAt' | 'updatedAt' | '__v' | 'pictureUrl'
 >;
 
-export type { Vehicle, VehicleAddData };
+type VehicleUpdateData = Partial<
+  Omit<Vehicle, '_id' | 'createdAt' | 'updatedAt' | '__v'>
+>;
+
+export type { Vehicle, VehicleAddData, VehicleUpdateData };
