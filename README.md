@@ -1,13 +1,33 @@
 # Vehicles CRUD
 
-CRUD para gerenciar frotas de veículos.
+CRUD para gerenciar veículos feito com Node.js, NestJS, TypeScript, MongoDB, Docker e React.
 
-Docker utilizado para rodar o banco de dados MongoDB.
+![Dashboard](assets/dashboard.png)
 
-## Backend
+## Como rodar o projeto
 
-API Rest utilizando NestJS, TypeScript e MongoDB.
+### Serviços
 
-## Frontend
+Primeiramente é necessário ativar o **MongoDB** utilizando **Docker**, para isso basta rodar o comando `docker-compose up` na pasta raíz do projeto.
 
-SPA consumindo a API utilizando React e estilizado com TailwindCSS.
+### Backend
+
+```sh
+cd backend
+npm install
+npm start
+```
+
+### Frontend
+
+```sh
+cd frontend
+npm install
+npm run dev
+```
+
+## Rotas da API
+
+É possível ver as rotas disponíveis na API documentadas pelo Swagger, acessando http://localhost:3000/api
+
+![Swagger](assets/swagger.png)
