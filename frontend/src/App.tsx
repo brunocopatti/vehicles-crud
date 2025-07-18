@@ -1,9 +1,14 @@
-function App() {
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import VehicleCardList from './components/VehicleCardList';
+
+const queryClient = new QueryClient();
+
+export default function App() {
   return (
-    <div>
-      <h1>hello world</h1>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div className="min-h-screen bg-gray-100 p-6">
+        <VehicleCardList />
+      </div>
+    </QueryClientProvider>
   );
 }
-
-export default App;
